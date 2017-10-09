@@ -1,3 +1,4 @@
+
 import os
 from flaskext.mysql import MySQL
 
@@ -27,10 +28,17 @@ app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 mysql.init_app(app)
 
-@app.route('/')
-@app.route('/login')
+session=dict()
+session['username']=""
+
+
+@app.route('/', methods = ['GET','POST'])
+@app.route('/login', methods = ['GET','POST'])
 def login():
-	return render_template('index.html', flag=True)
+	if session['username']:
+		return render_template('home.html')
+	return render_template('index.html', flag=False, gg=session['username'])
+
 
 @app.route('/register',methods = ['GET','POST'])
 def register():
@@ -46,15 +54,18 @@ def register():
 		sucess = True;
 		try:
 			cursor.execute(''' INSERT INTO USERBASE values( '''+fname+','+lname+','+rno	+','+email+','+password+''')''')
+			session['username']=request.form['email']
 			conn.commit()
 		except:
 			sucess = False;
 		cursor.close()
 		conn.close()
 		flash("Registration status:"+str(sucess));
-		return render_template('index.html',flag=sucess)
+		return render_template('index.html',flag=sucess,gg=session['username'])
 
-
+@app.route('/logout', methods = ['GET','POST'])
+def logout():
+		return "LOGOUT"
 
 @app.route('/authenticate', methods = ['GET','POST'])
 def authenticate():
@@ -68,7 +79,8 @@ def authenticate():
 	a = cursor.fetchone()
 	if a is not None:
 		for i in a:
-			return i+" logged in!"
+			session['username']=request.form['email']
+			return render_template('home.html')
 	else:
 		return "FAILED!"
 
