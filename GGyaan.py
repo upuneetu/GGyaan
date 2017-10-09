@@ -37,7 +37,7 @@ session['username']=""
 def login():
 	if session['username']:
 		return render_template('home.html')
-	return render_template('index.html', flag=False, gg=session['username'])
+	return render_template('index.html', flag=False)
 
 
 @app.route('/register',methods = ['GET','POST'])
@@ -61,11 +61,12 @@ def register():
 		cursor.close()
 		conn.close()
 		flash("Registration status:"+str(sucess));
-		return render_template('index.html',flag=sucess,gg=session['username'])
+		return render_template('index.html',flag=sucess)
 
 @app.route('/logout', methods = ['GET','POST'])
 def logout():
-		return "LOGOUT"
+		session['username']=""
+		return render_template('index.html',flag=False)
 
 @app.route('/authenticate', methods = ['GET','POST'])
 def authenticate():
