@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html >
+<head>
+  <meta charset="UTF-8">
+  <title>Company</title>
+
+  
+  
+  
+  
+  
+  
+  <link href="{{ url_for('static', filename='css/google-style.css') }}" rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/normalize.css') }}">
+
+  
+      <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+  
+</head>
+
+<body>
+  
+  <div class="form">
+      
+      
+      <div class="tab-content">
+          <h1>Company</h1>
+          
+          <form action="/companyfill" method="post">
+          
+          
+          
+          <div class="field-wrap">
+            <label>
+              Company Name<span class="req">*</span>
+            </label>
+            <input type="text" required autocomplete="off" value="" name="cname"/>
+          </div>
+
+          <div class="field-wrap">
+            <label>
+              Intake
+            </label>
+            <input type="number"   autocomplete="off" value="" name="intake"/>
+          </div>
+          
+          <div class="field-wrap">
+            <label>
+              Stipend
+            </label>
+            <input type="number"  autocomplete="off" value="" name="stipend"/>
+          </div>
+		  
+		  
+		  <div class="field-wrap">
+            <label>
+              Benefits
+            </label>
+            <input type="text"  autocomplete="off" value="" name="benefit"/>
+          </div>
+
+		 
+		  <div class="field-wrap">
+            <label>
+              Date
+            </label>
+            <input type="date"  autocomplete="off" value="" name="cdate"/>
+          </div>
+
+	
+		  <div class="field-wrap">
+            <label>
+              Time
+            </label>
+            <input type="time"  autocomplete="off" value="" name="ctime"/>
+          </div>
+	  
+          <button type="submit" class="button button-block"/>Submit</button>
+          <button type="reset" class="button button-block"/>Reset</button>
+
+          </form>
+		  <form action="/login" method="get">
+
+          <button type="submit" class="button button-block"/>Back</button>
+			</form>
+        </div>
+        
+        
+		
+		
+		
+		
+		
+		
+        
+      </div><!-- tab-content -->
+      
+</div> <!-- /form -->
+  <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <script  src="{{ url_for('static', filename='js/index.js') }}"></script>
+
+</body>
+</html>

@@ -4,19 +4,7 @@
   <meta charset="UTF-8">
   <title>Sign up/Log in</title>
 
-  {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      
-      {% for message in messages %}
-        <p>{{ message }} </p>
-      {% endfor %}
-      
-    {% endif %}
-  {% endwith %}
-  <p> {{ flag }} </p>
-  
-  
-  
+
   
   
   <link href="{{ url_for('static', filename='css/google-style.css') }}" rel='stylesheet' type='text/css'>
@@ -93,9 +81,9 @@
           
             <div class="field-wrap">
             <label>
-              Email Address<span class="req">*</span>
+              Roll Number<span class="req">*</span>
             </label>
-            <input type="email"required autocomplete="off" value="" name="email"/>
+            <input type="text"required autocomplete="off" value="" name="rno"/>
           </div>
           
           <div class="field-wrap">
