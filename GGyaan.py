@@ -2,7 +2,7 @@
 import os
 from flaskext.mysql import MySQL
 
-from flask import Flask,request,render_template, flash
+from flask import Flask,request,render_template,flash,redirect
 
 from wtforms import Form, BooleanField, StringField, PasswordField, validators
 
@@ -12,11 +12,7 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 
 app.config.update(dict(
-	DATABASE=os.path.join(app.root_path, 'flaskr.db'),
-    SECRET_KEY='development key',
-    USERNAME='admin',
-    PASSWORD='default'
-
+    SECRET_KEY='development key'
 ))
 
 
@@ -31,16 +27,6 @@ app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 mysql.init_app(app)
 
 session=dict()
-
-
-@app.context_processor
-def inject_user():
-    return dict(session=session)
-
-session['username']=""
-session['type']=""
-session['company']=list()
-
 
 def companyinit():
 	session['company']=list()
@@ -59,10 +45,18 @@ def companyinit():
 	cursor.close()
 	conn.close()
 
+@app.context_processor
+def inject_user():
+    return dict(session=session)
+
+session['username']=""
+session['type']=""
+session['company']=list()
+
 
 @app.route('/', methods = ['GET','POST'])
-@app.route('/login', methods = ['GET','POST'])
-def login():
+@app.route('/home', methods = ['GET','POST'])
+def home():
 	if session['username']:
 		companyinit()
 		return render_template('home.html')
@@ -90,7 +84,8 @@ def register():
 			conn.commit()
 			cursor.close()
 			conn.close()
-			return render_template('home.html')
+			redirect("/home")
+			#return render_template('home.html')
 
 		except:
 			sucess = False;
@@ -120,8 +115,8 @@ def authenticate():
 			session['username']=request.form['rno']
 			session['type']='student'
 			companyinit()
-
-			return render_template('home.html')
+			return redirect("/home")
+			
 	else:
 		cursor.execute('''SELECT * from IC WHERE username='''+rno+''' AND passwd=  '''+ password)
 		a = cursor.fetchone()
@@ -130,12 +125,11 @@ def authenticate():
 				session['username']=request.form['rno']
 				session['type']='ic'
 				companyinit()
-
-			return render_template('home.html')
+				return redirect("/home")	
+			
 		else:
 			return "FAILED!"
 
-	return str(a);
 	
 	
 	
