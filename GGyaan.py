@@ -136,13 +136,8 @@ def authenticate():
 @app.route('/profile', methods = ['GET','POST'])
 def profile():
 	return render_template('profile.html')
+	
 		
-	
-	
-	
-	
-	
-
 
 
 @app.route('/profilefill',methods = ['GET','POST'])

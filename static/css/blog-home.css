@@ -13,3 +13,22 @@ body {
         padding-top: 56px;
     }
 }
+
+.bg{
+	background-color: rgba(0,0,0,.050)
+}
+
+
+form input{
+	padding: 5px 5px 0px 5px;
+	margin-top: 7px;
+	margin-bottom: 2px;
+	width: 65%;
+}
+
+.label{
+	visibility: visible;
+	color: rgba(0,0,0,1);
+	padding-left:7px;
+	font-size: 12px;
+}
