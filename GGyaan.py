@@ -1,9 +1,7 @@
 
 import os
 from flaskext.mysql import MySQL
-
-from flask import Flask,request,render_template,flash,redirect
-
+from flask import Flask,request,render_template,flash,redirect,session
 from wtforms import Form, BooleanField, StringField, PasswordField, validators
 
 mysql = MySQL()
@@ -26,7 +24,7 @@ app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 mysql.init_app(app)
 
-session=dict()
+#session=dict()
 
 def companyinit():
 	session['company']=list()
@@ -49,19 +47,18 @@ def companyinit():
 def inject_user():
     return dict(session=session)
 
-session['username']=""
-session['type']=""
-session['company']=list()
+#session['username']=""
+#session['type']=""
+#session['company']=list()
 
 
 @app.route('/', methods = ['GET','POST'])
 @app.route('/home', methods = ['GET','POST'])
 def home():
-	if session['username']:
+	if 'username' in session:
 		companyinit()
 		return render_template('home.html')
 	return render_template('index.html', flag=False)
-
 
 @app.route('/register',methods = ['GET','POST'])
 def register():
@@ -96,8 +93,8 @@ def register():
 
 @app.route('/logout', methods = ['GET','POST'])
 def logout():
-		session['username']=""
-		session['type']=""
+		session.pop('username',None)
+		session.pop('type',None)
 		return render_template('index.html',flag=False)
 
 @app.route('/authenticate', methods = ['GET','POST'])
