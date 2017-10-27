@@ -74,17 +74,24 @@
           <div class="card mb-4 bg">
             <div class="card-body">
 
-              <form action="#">
+              <form action="/profilefill" method="post">
                 
-                <input type="text" name="fname" placeholder="First Name">
+                <input type="text" name="fname" value={{prefill['fname']}} placeholder="First Name">
                 <div class="label">First Name</div>
-                <input type="text" name="lname" placeholder="Last Name">
+                <input type="text" name="lname" value={{prefill['lname']}} placeholder="Last Name">
                 <div class="label">Last Name</div>
-                <input type="text" name="rno" placeholder="Roll Number">
-                <div class="label">CGPA</div>
+                {% if prefill['cgpa'] %}
+                <input type="text" name="cgpa" value={{prefill['cgpa']}} placeholder="CGPA">
+                {% else %}
                 <input type="text" name="cgpa" placeholder="CGPA">
-                <div class="label">Link to Resume</div>
+                {% endif %}
+                <div class="label">CGPA</div>
+                {% if prefill['resume'] %}
+                <input type="text" name="resume" value={{prefill['resume']}} placeholder="Link to Resume">
+                {% else %}
                 <input type="text" name="resume" placeholder="Link to Resume">
+                {% endif %}
+                <div class="label">Link to Resume</div>
                 <br><br><br>
                 <input type="text" name="address_line1" placeholder="Address Line 1">
                 <div class="label">Address Line 1</div>
@@ -96,9 +103,9 @@
                 <div class="label">Address Line 4</div>
                 <br><br>
                
-                <button type="submit" class="btn btn-primary"/>Update</button>
+                <button type = "submit" class="btn btn-primary"/>Update</button>
                 <button type="reset" class="btn btn-primary"/>Reset</button>
-              </form action="/home" method="get">
+              </form>
             </div>
             <div class="card-footer text-muted">
               Last Updated on January 1, 2017.

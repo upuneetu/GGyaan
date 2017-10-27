@@ -8,23 +8,17 @@ mysql = MySQL()
 
 app = Flask(__name__)
 app.config.from_object(__name__)
-
 app.config.update(dict(
     SECRET_KEY='development key'
 ))
-
 
 
 app.config['MYSQL_DATABASE_USER'] = 'root'
 app.config['MYSQL_DATABASE_PASSWORD'] = '1234567890'
 app.config['MYSQL_DATABASE_DB'] = 'dbms'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
-
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
-
 mysql.init_app(app)
-
-#session=dict()
 
 def companyinit():
 	session['company']=list()
@@ -47,17 +41,13 @@ def companyinit():
 def inject_user():
     return dict(session=session)
 
-#session['username']=""
-#session['type']=""
-#session['company']=list()
-
 
 @app.route('/', methods = ['GET','POST'])
 @app.route('/home', methods = ['GET','POST'])
 def home():
 	if 'username' in session:
 		companyinit()
-		return render_template('home.html')
+		return render_template('home.html',flag=True)
 	return render_template('index.html', flag=False)
 
 @app.route('/register',methods = ['GET','POST'])
@@ -81,7 +71,7 @@ def register():
 			conn.commit()
 			cursor.close()
 			conn.close()
-			redirect("/home")
+			return redirect("/home")
 			#return render_template('home.html')
 
 		except:
@@ -95,10 +85,12 @@ def register():
 def logout():
 		session.pop('username',None)
 		session.pop('type',None)
+		session.pop('fname',None)
 		return render_template('index.html',flag=False)
 
 @app.route('/authenticate', methods = ['GET','POST'])
 def authenticate():
+	
 	conn = mysql.connect()
 	cursor = conn.cursor();
 
@@ -111,6 +103,7 @@ def authenticate():
 		for i in a:
 			session['username']=request.form['rno']
 			session['type']='student'
+			session['fname']=i
 			companyinit()
 			return redirect("/home")
 			
@@ -118,8 +111,11 @@ def authenticate():
 		cursor.execute('''SELECT * from IC WHERE username='''+rno+''' AND passwd=  '''+ password)
 		a = cursor.fetchone()
 		if a is not None:
-			for i in a:
+				a = a[0]
 				session['username']=request.form['rno']
+				cursor.execute('''SELECT fname from USERBASE WHERE rno='''+rno)
+				fname = cursor.fetchone()
+				session['fname'] = fname[0]
 				session['type']='ic'
 				companyinit()
 				return redirect("/home")	
@@ -132,22 +128,54 @@ def authenticate():
 	
 @app.route('/profile', methods = ['GET','POST'])
 def profile():
-	return render_template('profile.html')
-	
-		
+	conn = mysql.connect()
+	cursor = conn.cursor()
 
+	cursor.execute("SELECT * from STUDENT WHERE rno=\'"+session['username']+"\';")
+	record_tuple = cursor.fetchone()
+	record = {}
+	#or record['fname']==None or record['fname']=='NULL':
+	cursor.execute("SELECT * from USERBASE WHERE rno=\'"+session['username']+"\';")
+	user = cursor.fetchone()
+		
+	record['fname'] = user[0]
+	record['lname'] = user[1]
+	record['rno'] = session['username']
+	if record_tuple is not None:
+		record['address']=record_tuple[1]
+		record['cgpa'] = record_tuple[2]
+		record['resume'] = record_tuple[3]
+		record['testexp'] = record_tuple[4]
+	else:
+		record['address']=None
+		record['cgpa'] =None
+		record['resume'] =None
+		record['testexp'] =None
+	
+
+	cursor.close()
+	conn.close()
+	return render_template('profile.html',prefill=record)
+		
 
 @app.route('/profilefill',methods = ['GET','POST'])
 def profilefill():
+	print(request)
+	print(request.method)
 	if request.method == 'POST': #and form.validate()
 		conn = mysql.connect()
 		cursor = conn.cursor()		
 		
+		addressLine1 = str(request.form['address_line1']);
+		addressLine2 = str(request.form['address_line2']);
+		addressLine3 = str(request.form['address_line3']);
+		addressLine4 = str(request.form['address_line4']);
 		
-		address = "\'"+str(request.form['addr'])+"\'";
+		address = addressLine1 + " " + addressLine2 + " " + addressLine3 + " " + addressLine4;
+		address = "\'"+address+"\'";
 		cgpa = str(request.form['cgpa']);
 		resume = "\'"+str(request.form['resume'])+"\'";
-		testexp = "\'"+str(request.form['testexp'])+"\'";
+		#testexp = "\'"+str(request.form['testexp'])+"\'";
 		
 		
 		if(address==''):
@@ -156,32 +184,44 @@ def profilefill():
 			cgpa='NULL'
 		if(resume==''):
 			resume='NULL'
-		if(testexp==''):
-			testexp='NULL'
+		testexp = 'NULL'
 		
 		
 		
 		cursor.execute('''SELECT rno from STUDENT WHERE rno='''+"\'"+session['username']+"\'")
 		a = cursor.fetchone()
 		
-		try:
-			
+		try:	
 			if a is not None:
 				cursor.execute('''DELETE FROM STUDENT WHERE rno='''+"\'"+session['username']+"\'")
 
 			
 			cursor.execute(''' INSERT INTO STUDENT values( '''+"\'"+session['username']+"\'"+','+address+','+cgpa+','+resume	+','+testexp+''')''')
 			conn.commit()
+			
 		except:
 			pass		
 		cursor.close()
 		conn.close()
-		return render_template('home.html')	
+		return redirect("/home")
+	else:
+		return "FAIL"
+		#return render_template('home.html')	
 		
 @app.route('/company', methods = ['GET','POST'])
 def company():
 	return render_template('company.html')
-		
+
+@app.route('/mobilelogin',methods=['GET','POST'])
+def mobilelogin():
+	print(request.values['rno'])
+	unname = request.values['rno']
+	pword = request.values['password']
+
+
+
+	print(type(request.values))
+	return "sucess"			
 		
 @app.route('/companyfill',methods = ['GET','POST'])
 def companyfill():
@@ -222,17 +262,15 @@ def companyfill():
 			conn.commit()
 		except:
 			pass		
-		
-
-
+	
 		
 		cursor.close()
 		conn.close()
-		return render_template('home.html')	
+		return redirect('/home')
 	
 	
 	
 
 if __name__ == "__main__":
-	app.run()
-
+	#app.run(host="0.0.0.0",debug=True)
+	app.run(debug=True)
