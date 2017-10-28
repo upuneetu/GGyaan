@@ -20,7 +20,7 @@
   <body>
 	
 	
-	{% for i in session['company']: %}
+	{% for i in companylist: %}
 	<p> {{i}} </p>
 	{% endfor %}
 	
@@ -53,9 +53,16 @@
             <li class="nav-item">
               <a class="nav-link" href="/company">Company</a>
 			  </li>
+	{% elif session['type'] == 'admin' %}
+	 <li class="nav-item">
+              <a class="nav-link" href="/addic">IC</a>
+			  </li>
 	<li class="nav-item">
 	
 	{% endif %}
+	
+		<li class="nav-item">
+
   <a class="nav-link"/ href="/logout">Logout</a>
   
             </li>
@@ -147,35 +154,22 @@
             </div>
           </div>
 
-          <!-- Categories Widget -->
+          <!-- Companies Widget -->
           <div class="card my-4">
-            <h5 class="card-header">Categories</h5>
+            <h5 class="card-header">Companies to follow</h5>
             <div class="card-body">
               <div class="row">
+                
                 <div class="col-lg-6">
                   <ul class="list-unstyled mb-0">
+				  
+					{% for i in companylist: %}
                     <li>
-                      <a href="#">Web Design</a>
+                      <a href="?company={{companylist.index(i)}}">{{i[0]}}</a>
                     </li>
-                    <li>
-                      <a href="#">HTML</a>
-                    </li>
-                    <li>
-                      <a href="#">Freebies</a>
-                    </li>
-                  </ul>
-                </div>
-                <div class="col-lg-6">
-                  <ul class="list-unstyled mb-0">
-                    <li>
-                      <a href="#">JavaScript</a>
-                    </li>
-                    <li>
-                      <a href="#">CSS</a>
-                    </li>
-                    <li>
-                      <a href="#">Tutorials</a>
-                    </li>
+					
+					{% endfor %}
+                    
                   </ul>
                 </div>
               </div>

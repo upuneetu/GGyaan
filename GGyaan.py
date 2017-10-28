@@ -20,9 +20,10 @@ app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 mysql.init_app(app)
 
-def companyinit():
-	session['company']=list()
 
+def companyinit():
+	global companylist
+	companylist=list()
 	conn = mysql.connect()
 	cursor = conn.cursor()
 	
@@ -30,7 +31,7 @@ def companyinit():
 	a = cursor.fetchall()
 	if a is not None:
 		for i in a:
-			session['company'].append(i)
+			companylist.append(i)
 			
 	else:
 		pass
@@ -47,7 +48,32 @@ def inject_user():
 def home():
 	if 'username' in session:
 		companyinit()
-		return render_template('home.html',flag=True)
+		cno=request.args.get('company')
+		if cno is not None:
+			conn = mysql.connect()
+			cursor = conn.cursor()
+			
+			rno="\'"+session['username']+"\'"
+			cname="\'"+companylist[int(cno)][0]+"\'"
+			
+			try:
+				cursor.execute('''SELECT * from FOLLOWING WHERE rno='''+rno+''' AND cname='''+cname)
+				fname = cursor.fetchone()
+				if fname is None:
+					cursor.execute(''' INSERT INTO FOLLOWING values( '''+rno	+','+cname+''')''')		
+			except:
+				pass
+			
+			
+			
+			
+			
+			conn.commit()
+			cursor.close()
+			conn.close()
+		
+		
+		return render_template('home.html',flag=True,companylist=companylist)
 	return render_template('index.html', flag=False)
 
 @app.route('/register',methods = ['GET','POST'])
@@ -62,10 +88,15 @@ def register():
 		email = "\'"+str(request.form['email'])+"\'";
 		password = "\'"+str(request.form['password'])+"\'";
 		sucess = True;
+
 		try:
-			cursor.execute(''' INSERT INTO USERBASE values( '''+fname+','+lname+','+rno	+','+email+','+password+''')''')
+			cursor.execute(''' INSERT INTO USERBASE values( '''+rno	+','+password+''')''')
+			cursor.execute(''' INSERT INTO STUDENT(rno,fname,lname,email) values( '''+rno+','+fname+','+lname+','+email+''')''')
+
 			session['username']=request.form['rno']
 			session['type']='student'
+			session['fname']=request.form['fname']
+
 			companyinit()
 
 			conn.commit()
@@ -96,14 +127,23 @@ def authenticate():
 
 	rno = "\'"+str(request.form['rno'])+"\'"
 	password = "\'"+str(request.form['passw'])+"\'"
-
-	cursor.execute('''SELECT fname from USERBASE WHERE rno='''+rno+''' AND password=  '''+ password)
+	
+	
+	if(rno=="\'akhil\'" and password=="\'destroy\'"):
+		session['username']='akhil'
+		session['type']='admin'
+		session['fname']='Admin'
+		return redirect("/home")
+	
+	cursor.execute('''SELECT * from USERBASE WHERE rno='''+rno+''' AND password=  '''+ password)
 	a = cursor.fetchone()
 	if a is not None:
 		for i in a:
 			session['username']=request.form['rno']
 			session['type']='student'
-			session['fname']=i
+			cursor.execute('''SELECT fname from STUDENT WHERE rno='''+rno)
+			fname = cursor.fetchone()
+			session['fname'] = fname[0]
 			companyinit()
 			return redirect("/home")
 			
@@ -113,7 +153,7 @@ def authenticate():
 		if a is not None:
 				a = a[0]
 				session['username']=request.form['rno']
-				cursor.execute('''SELECT fname from USERBASE WHERE rno='''+rno)
+				cursor.execute('''SELECT fname from STUDENT WHERE rno='''+rno)
 				fname = cursor.fetchone()
 				session['fname'] = fname[0]
 				session['type']='ic'
@@ -135,22 +175,27 @@ def profile():
 	record_tuple = cursor.fetchone()
 	record = {}
 	#or record['fname']==None or record['fname']=='NULL':
-	cursor.execute("SELECT * from USERBASE WHERE rno=\'"+session['username']+"\';")
-	user = cursor.fetchone()
+	#cursor.execute("SELECT * from USERBASE WHERE rno=\'"+session['username']+"\';")
+	#user = cursor.fetchone()
 		
-	record['fname'] = user[0]
-	record['lname'] = user[1]
+	
 	record['rno'] = session['username']
 	if record_tuple is not None:
-		record['address']=record_tuple[1]
-		record['cgpa'] = record_tuple[2]
-		record['resume'] = record_tuple[3]
-		record['testexp'] = record_tuple[4]
+		record['fname'] = record_tuple[1]
+		record['lname'] = record_tuple[2]
+		record['email']= record_tuple[3]
+		record['address']=record_tuple[4]
+		record['cgpa'] = record_tuple[5]
+		record['resume'] = record_tuple[6]
+		record['testexp'] = record_tuple[7]
 	else:
-		record['address']=None
-		record['cgpa'] =None
-		record['resume'] =None
-		record['testexp'] =None
+		record['fname'] = None
+		record['lname'] = None
+		record['email']= None
+		record['address']= None
+		record['cgpa'] = None
+		record['resume'] = None
+		record['testexp'] = None
 	
 
 	cursor.close()
@@ -165,6 +210,14 @@ def profilefill():
 	if request.method == 'POST': #and form.validate()
 		conn = mysql.connect()
 		cursor = conn.cursor()		
+		
+		
+		
+		
+		fname = "\'"+str(request.form['fname'])+"\'"
+		lname = "\'"+str(request.form['lname'])+"\'"
+		email = "\'"+str(request.form['email'])+"\'"
+		
 		
 		addressLine1 = str(request.form['address_line1']);
 		addressLine2 = str(request.form['address_line2']);
@@ -196,7 +249,7 @@ def profilefill():
 				cursor.execute('''DELETE FROM STUDENT WHERE rno='''+"\'"+session['username']+"\'")
 
 			
-			cursor.execute(''' INSERT INTO STUDENT values( '''+"\'"+session['username']+"\'"+','+address+','+cgpa+','+resume	+','+testexp+''')''')
+			cursor.execute(''' INSERT INTO STUDENT values( '''+"\'"+session['username']+"\'"+','+fname+','+lname+','+email+','+address+','+cgpa+','+resume	+','+testexp+''')''')
 			conn.commit()
 			
 		except:
@@ -269,6 +322,59 @@ def companyfill():
 		return redirect('/home')
 	
 	
+	
+@app.route('/addic', methods = ['GET','POST'])
+def addic():
+	return render_template('addic.html')
+		
+
+@app.route('/addicfill',methods = ['GET','POST'])
+def addicfill():
+	print(request)
+	print(request.method)
+	if request.method == 'POST': #and form.validate()
+		conn = mysql.connect()
+		cursor = conn.cursor()		
+		
+		
+		username = "\'"+str(request.form['username'])+"\'"
+		password = "\'"+str(request.form['password'])+"\'"	
+		inv_hours = "\'"+str(request.form['inv_hours'])+"\'"	
+
+		fname = "\'"+str(request.form['fname'])+"\'"
+		lname = "\'"+str(request.form['lname'])+"\'"
+		email = "\'"+str(request.form['email'])+"\'"
+		
+		
+		
+		try:
+			cursor.execute(''' INSERT INTO IC values( '''+username	+','+password+','+inv_hours+''')''')
+			cursor.execute(''' INSERT INTO STUDENT(rno,fname,lname,email) values( '''+username+','+fname+','+lname+','+email+''')''')
+
+			
+
+			conn.commit()
+			cursor.close()
+			conn.close()
+			return redirect("/home")
+			#return render_template('home.html')
+
+		except:
+			sucess = False;
+		
+		
+		
+		
+		cursor.close()
+		conn.close()
+		return redirect("/home")
+	else:
+		return "FAIL"
+		#return render_template('home.html')	
+	
+	
+	
+
 	
 
 if __name__ == "__main__":

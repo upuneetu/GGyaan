@@ -74,38 +74,24 @@
           <div class="card mb-4 bg">
             <div class="card-body">
 
-              <form action="/profilefill" method="post">
+              <form action="/addicfill" method="post">
                 
-                <input type="text" name="fname" value={{prefill['fname']}} placeholder="First Name" readonly>
-                <div class="label">First Name</div>
-                <input type="text" name="lname" value={{prefill['lname']}} placeholder="Last Name" readonly>
-                <div class="label">Last Name</div>
-				<input type="email" name="email" value={{prefill['email']}} placeholder="Email" readonly>
-                <div class="label">Email</div>
-                {% if prefill['cgpa'] %}
-                <input type="text" name="cgpa" value={{prefill['cgpa']}} placeholder="CGPA">
-                {% else %}
-                <input type="text" name="cgpa" placeholder="CGPA">
-                {% endif %}
-                <div class="label">CGPA</div>
-                {% if prefill['resume'] %}
-                <input type="text" name="resume" value={{prefill['resume']}} placeholder="Link to Resume">
-                {% else %}
-                <input type="text" name="resume" placeholder="Link to Resume">
-                {% endif %}
-                <div class="label">Link to Resume</div>
+                <input type="text" required name="username" placeholder="Username">
+                <div class="label">Username</div>
+                <input type="text" required name="password" placeholder="Password">
+                <div class="label">Password</div>
+                <input type="text" required name="inv_hours" placeholder="Invigilation Hours">
+                <div class="label">Invigilation Hours</div>
                 <br><br><br>
-                <input type="text" name="address_line1" placeholder="Address Line 1">
-                <div class="label">Address Line 1</div>
-                <input type="text" name="address_line2" placeholder="Address Line 2">
-                <div class="label">Address Line 2</div>
-                <input type="text" name="address_line3" placeholder="Address Line 3">
-                <div class="label">Address Line 3</div>
-                <input type="text" name="address_line4" placeholder="Address Line 4">
-                <div class="label">Address Line 4</div>
+                <input type="text" required name="fname" placeholder="First Name">
+                <div class="label">First Name</div>
+                <input type="text" required name="lname" placeholder="Last Name">
+                <div class="label">Last Name</div>
+                <input type="email" required name="email" placeholder="Email">
+                <div class="label">Email</div>
                 <br><br>
                
-                <button type = "submit" class="btn btn-primary"/>Update</button>
+                <button type = "submit" class="btn btn-primary"/>Add</button>
                 <button type="reset" class="btn btn-primary"/>Reset</button>
               </form>
             </div>
