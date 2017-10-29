@@ -125,7 +125,7 @@ input:focus, textarea:focus {
 }
 
 textarea {
-  border: 2px solid #a0b3b0;
+  border: 1px solid #a0b3b0;
   resize: vertical;
 }
 

@@ -97,7 +97,6 @@ def register():
 			session['type']='student'
 			session['fname']=request.form['fname']
 
-			companyinit()
 
 			conn.commit()
 			cursor.close()
@@ -144,7 +143,6 @@ def authenticate():
 			cursor.execute('''SELECT fname from STUDENT WHERE rno='''+rno)
 			fname = cursor.fetchone()
 			session['fname'] = fname[0]
-			companyinit()
 			return redirect("/home")
 			
 	else:
@@ -157,7 +155,6 @@ def authenticate():
 				fname = cursor.fetchone()
 				session['fname'] = fname[0]
 				session['type']='ic'
-				companyinit()
 				return redirect("/home")	
 			
 		else:
@@ -205,14 +202,13 @@ def profile():
 
 @app.route('/profilefill',methods = ['GET','POST'])
 def profilefill():
-	print(request)
-	print(request.method)
+	
 	if request.method == 'POST': #and form.validate()
 		conn = mysql.connect()
 		cursor = conn.cursor()		
 		
 		
-		
+		print(request.form['rand'])
 		
 		fname = "\'"+str(request.form['fname'])+"\'"
 		lname = "\'"+str(request.form['lname'])+"\'"
@@ -330,8 +326,7 @@ def addic():
 
 @app.route('/addicfill',methods = ['GET','POST'])
 def addicfill():
-	print(request)
-	print(request.method)
+	
 	if request.method == 'POST': #and form.validate()
 		conn = mysql.connect()
 		cursor = conn.cursor()		
@@ -373,8 +368,48 @@ def addicfill():
 		#return render_template('home.html')	
 	
 	
+@app.route('/msg',methods = ['GET','POST'])
+def msg():
+	return render_template('alert.html',companylist=companylist)
+		
+@app.route('/msgfill',methods = ['GET','POST'])
+def msgfill():
 	
+	if request.method == 'POST': #and form.validate()
+		conn = mysql.connect()
+		cursor = conn.cursor()		
+		
+		
+		cname = "\'"+str(request.form['cname'])+"\'"		
+		msgcontent = "\'"+str(request.form['message'])+"\'"
+		
+		
+		
+		cursor.execute(''' INSERT INTO alert values( '''+cname	+','+msgcontent+',SYSDATE()'+''')''')
+		
+		
+		try:
+			#cursor.execute(''' INSERT INTO alert values( '''+cname	+','+msg+',SYSDATE()'+''')''')
 
+			
+
+			conn.commit()
+			cursor.close()
+			conn.close()
+			return redirect("/home")
+			#return render_template('home.html')
+
+		except:
+			sucess = False;
+		
+		
+		
+		
+		cursor.close()
+		conn.close()
+		return redirect("/home")
+	else:
+		return "FAIL"
 	
 
 if __name__ == "__main__":
