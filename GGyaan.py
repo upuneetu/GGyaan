@@ -46,6 +46,10 @@ def inject_user():
 @app.route('/', methods = ['GET','POST'])
 @app.route('/home', methods = ['GET','POST'])
 def home():
+
+	global IS_APP_USER
+	IS_APP_USER = False
+
 	if 'username' in session:
 		companyinit()
 		cno=request.args.get('company')
@@ -120,13 +124,17 @@ def logout():
 
 @app.route('/authenticate', methods = ['GET','POST'])
 def authenticate():
-	
+
 	conn = mysql.connect()
 	cursor = conn.cursor();
-
-	rno = "\'"+str(request.form['rno'])+"\'"
-	password = "\'"+str(request.form['passw'])+"\'"
-	
+	try:
+		rno = request.values['username']
+		password = request.values['password']
+		IS_APP_USER=True
+	except:	
+		rno = "\'"+str(request.form['rno'])+"\'"
+		password = "\'"+str(request.form['passw'])+"\'"
+		IS_APP_USER = False
 	
 	if(rno=="\'akhil\'" and password=="\'destroy\'"):
 		session['username']='akhil'
@@ -138,11 +146,13 @@ def authenticate():
 	a = cursor.fetchone()
 	if a is not None:
 		for i in a:
-			session['username']=request.form['rno']
+			session['username']=rno
 			session['type']='student'
 			cursor.execute('''SELECT fname from STUDENT WHERE rno='''+rno)
 			fname = cursor.fetchone()
 			session['fname'] = fname[0]
+			if IS_APP_USER:
+				return "sucess"
 			return redirect("/home")
 			
 	else:
@@ -150,16 +160,19 @@ def authenticate():
 		a = cursor.fetchone()
 		if a is not None:
 				a = a[0]
-				session['username']=request.form['rno']
+				session['username']=rno
 				cursor.execute('''SELECT fname from STUDENT WHERE rno='''+rno)
 				fname = cursor.fetchone()
 				session['fname'] = fname[0]
 				session['type']='ic'
+				if IS_APP_USER:
+					return sucess
 				return redirect("/home")	
 			
 		else:
+			if IS_APP_USER:
+				return "failed"
 			return "FAILED!"
-
 	
 	
 	
@@ -410,8 +423,13 @@ def msgfill():
 		return redirect("/home")
 	else:
 		return "FAIL"
+
+@app.route('/attendance',methods = ['GET','POST'])
+def attendance():
+	print(session['username'])
+	return "GOOD"
 	
 
 if __name__ == "__main__":
-	#app.run(host="0.0.0.0",debug=True)
-	app.run(debug=True)
+	app.run(host="0.0.0.0",debug=True)
+	#app.run(debug=True)
