@@ -208,7 +208,6 @@ def profilefill():
 		cursor = conn.cursor()		
 		
 		
-		print(request.form['rand'])
 		
 		fname = "\'"+str(request.form['fname'])+"\'"
 		lname = "\'"+str(request.form['lname'])+"\'"
@@ -227,7 +226,7 @@ def profilefill():
 		#testexp = "\'"+str(request.form['testexp'])+"\'";
 		
 		
-		if(address==''):
+		if(addressLine1+addressLine2+addressLine3+addressLine4==""):
 			address='NULL'
 		if(cgpa==''):
 			cgpa='NULL'
@@ -244,6 +243,7 @@ def profilefill():
 			if a is not None:
 				cursor.execute('''DELETE FROM STUDENT WHERE rno='''+"\'"+session['username']+"\'")
 
+				
 			
 			cursor.execute(''' INSERT INTO STUDENT values( '''+"\'"+session['username']+"\'"+','+fname+','+lname+','+email+','+address+','+cgpa+','+resume	+','+testexp+''')''')
 			conn.commit()
