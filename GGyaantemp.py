@@ -22,25 +22,12 @@ mysql.init_app(app)
 
 
 def companyinit():
-	global companylist
-	companylist=list()
 	
 	session['companylist']=list()
 	conn = mysql.connect()
 	cursor = conn.cursor()
 	
-	
-	cursor.execute('''SELECT * from company''')
-	
-	a = cursor.fetchall()
-	if a is not None:
-		for i in a:
-			companylist.append(i)
-			
-	else:
-		pass
-	cursor.execute(''' CALL company_not_following(\''''+session['username']+'''\')''')		
-
+	cursor.execute(''' call company_not_following('''+session['username']+''')''')		
 	a = cursor.fetchall()
 	if a is not None:
 		for i in a:
@@ -59,14 +46,17 @@ def inject_user():
 @app.route('/', methods = ['GET','POST'])
 @app.route('/home', methods = ['GET','POST'])
 def home():
+
+	global IS_APP_USER
+	IS_APP_USER = False
+
 	if 'username' in session:
 		companyinit()
 		cno=request.args.get('company')
-		
-		conn = mysql.connect()
-		cursor = conn.cursor()
-			
 		if cno is not None:
+			conn = mysql.connect()
+			cursor = conn.cursor()
+			
 			rno="\'"+session['username']+"\'"
 			cname="\'"+session['companylist'][int(cno)][0]+"\'"
 			
@@ -75,30 +65,19 @@ def home():
 				fname = cursor.fetchone()
 				if fname is None:
 					cursor.execute(''' INSERT INTO FOLLOWING values( '''+rno	+','+cname+''')''')		
-					companyinit()
 			except:
 				pass
 			
 			
 			
-		cursor.execute(''' CALL get_newsfeed(\''''+session['username']+'''\')''')
-		newsfeed = []
-		urls = []
-		result = cursor.fetchall();
-		for i in result:
-			newsfeed.append(i)
-			if i[1] != "General":
-				cursor.execute("SELECT url from company where cname=\'"+i[1]+"\';");
-				b = cursor.fetchone();
-				urls.append(str(b[0]))
-			else:
-				urls.append("google.com")
-				
-		conn.commit()
-		cursor.close()
-		conn.close()
-		print(newsfeed)
-		return render_template('home.html',flag=True, newsfeed=newsfeed, urls=urls)
+			
+			
+			conn.commit()
+			cursor.close()
+			conn.close()
+		
+		
+		return render_template('home.html',flag=True)
 	return render_template('index.html', flag=False)
 
 @app.route('/register',methods = ['GET','POST'])
@@ -145,13 +124,17 @@ def logout():
 
 @app.route('/authenticate', methods = ['GET','POST'])
 def authenticate():
-	
+
 	conn = mysql.connect()
 	cursor = conn.cursor();
-
-	rno = "\'"+str(request.form['rno'])+"\'"
-	password = "\'"+str(request.form['passw'])+"\'"
-	
+	try:
+		rno = request.values['username']
+		password = request.values['password']
+		IS_APP_USER=True
+	except:	
+		rno = "\'"+str(request.form['rno'])+"\'"
+		password = "\'"+str(request.form['passw'])+"\'"
+		IS_APP_USER = False
 	
 	if(rno=="\'akhil\'" and password=="\'destroy\'"):
 		session['username']='akhil'
@@ -163,11 +146,13 @@ def authenticate():
 	a = cursor.fetchone()
 	if a is not None:
 		for i in a:
-			session['username']=request.form['rno']
+			session['username']=rno
 			session['type']='student'
 			cursor.execute('''SELECT fname from STUDENT WHERE rno='''+rno)
 			fname = cursor.fetchone()
 			session['fname'] = fname[0]
+			if IS_APP_USER:
+				return "sucess"
 			return redirect("/home")
 			
 	else:
@@ -175,50 +160,19 @@ def authenticate():
 		a = cursor.fetchone()
 		if a is not None:
 				a = a[0]
-				session['username']=request.form['rno']
+				session['username']=rno
 				cursor.execute('''SELECT fname from STUDENT WHERE rno='''+rno)
 				fname = cursor.fetchone()
 				session['fname'] = fname[0]
 				session['type']='ic'
+				if IS_APP_USER:
+					return sucess
 				return redirect("/home")	
 			
 		else:
+			if IS_APP_USER:
+				return "failed"
 			return "FAILED!"
-
-	
-	
-	
-	
-@app.route('/follow',methods = ['GET','POST'])
-def follow():
-	if 'username' in session:
-		companyinit()
-		cno=request.args.get('company')
-		if cno is not None:
-			conn = mysql.connect()
-			cursor = conn.cursor()
-			
-			rno="\'"+session['username']+"\'"
-			cname="\'"+session['companylist'][int(cno)][0]+"\'"
-			
-			try:
-				cursor.execute('''SELECT * from FOLLOWING WHERE rno='''+rno+''' AND cname='''+cname)
-				fname = cursor.fetchone()
-				if fname is None:
-					cursor.execute(''' INSERT INTO FOLLOWING values( '''+rno	+','+cname+''')''')		
-			except:
-				pass
-			
-			
-			
-			
-			
-			conn.commit()
-			cursor.close()
-			conn.close()
-		
-		
-	return redirect('/home')
 	
 	
 	
@@ -226,6 +180,7 @@ def follow():
 def profile():
 	conn = mysql.connect()
 	cursor = conn.cursor()
+
 	cursor.execute("SELECT * from STUDENT WHERE rno=\'"+session['username']+"\';")
 	record_tuple = cursor.fetchone()
 	record = {}
@@ -319,7 +274,16 @@ def profilefill():
 def company():
 	return render_template('company.html')
 
-		
+@app.route('/mobilelogin',methods=['GET','POST'])
+def mobilelogin():
+	print(request.values['rno'])
+	unname = request.values['rno']
+	pword = request.values['password']
+
+
+
+	print(type(request.values))
+	return "sucess"			
 		
 @app.route('/companyfill',methods = ['GET','POST'])
 def companyfill():
@@ -327,17 +291,15 @@ def companyfill():
 		conn = mysql.connect()
 		cursor = conn.cursor()		
 		
-		print("HERE1")
-		print(request.form)
+		
 		cname = "\'"+str(request.form['cname'])+"\'";
 		intake = str(request.form['intake']);
 		stipend = str(request.form['stipend']);
 		
-		benefit = "\'"+str(request.form['benefits'])+"\'";
+		benefit = "\'"+str(request.form['benefit'])+"\'";
 		cdate = "\'"+str(request.form['cdate'])+"\'";
 		ctime = "\'"+str(request.form['ctime'])+"\'";
 		
-		c_url = "\'"+str(request.form['url'])+"\'";
 		if(intake==''):
 			intake='NULL'
 		if(stipend==''):
@@ -348,8 +310,7 @@ def companyfill():
 			cdate='NULL'
 		if(ctime==''):
 			ctime='NULL'
-		
-		print("HERE2")
+			
 		cursor.execute('''SELECT cname from COMPANY WHERE cname='''+cname)
 		a = cursor.fetchone()
 
@@ -358,13 +319,13 @@ def companyfill():
 			if a is not None:
 				cursor.execute('''DELETE FROM COMPANY WHERE cname='''+cname)
 
-			#print(''' INSERT INTO COMPANY values( '''+cname+','+intake+','+stipend+','+benefit+','+cdate+','+ctime+','+"\'"+session['username']+"\',"+url+''')''');
-			cursor.execute(''' INSERT INTO COMPANY values( '''+cname+','+intake+','+stipend+','+benefit+','+cdate+','+ctime+','+"\'"+session['username']+"\',"+c_url+''')''')
+			
+			cursor.execute(''' INSERT INTO COMPANY values( '''+cname+','+intake+','+stipend+','+benefit+','+cdate+','+ctime+','+"\'"+session['username']+"\'"''')''')
 			conn.commit()
 		except:
 			pass		
 	
-		print("HERE3")
+		
 		cursor.close()
 		conn.close()
 		return redirect('/home')
@@ -422,8 +383,6 @@ def addicfill():
 	
 @app.route('/msg',methods = ['GET','POST'])
 def msg():
-	companyinit()
-
 	return render_template('alert.html',companylist=companylist)
 		
 @app.route('/msgfill',methods = ['GET','POST'])
@@ -433,14 +392,13 @@ def msgfill():
 		conn = mysql.connect()
 		cursor = conn.cursor()		
 		
-		sub = "\'"+str(request.form['sub'])+"\'"		
+		
 		cname = "\'"+str(request.form['cname'])+"\'"		
 		msgcontent = "\'"+str(request.form['message'])+"\'"
-		rno="\'"+session['username']+"\'"
-
 		
 		
-		cursor.execute(''' INSERT INTO alert values( '''+sub+','+cname	+','+msgcontent+','+rno+',SYSDATE()'+''')''')
+		
+		cursor.execute(''' INSERT INTO alert values( '''+cname	+','+msgcontent+',SYSDATE()'+''')''')
 		
 		
 		try:
@@ -465,8 +423,13 @@ def msgfill():
 		return redirect("/home")
 	else:
 		return "FAIL"
+
+@app.route('/attendance',methods = ['GET','POST'])
+def attendance():
+	print(session['username'])
+	return "GOOD"
 	
 
 if __name__ == "__main__":
-	#app.run(host="0.0.0.0",debug=True)
-	app.run(debug=True)
+	app.run(host="0.0.0.0",debug=False)
+	#app.run(debug=True)

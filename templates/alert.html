@@ -74,25 +74,22 @@
             <div class="card-body">
 
               <form action="/msgfill" method="post">
-                
-				
-				
-				
-				
-				
-				
-		<select class="form-control" name="cname">
-		{% for i in companylist %}   
-        <option>{{i[0]}}</option>
-        {% endfor %}
-        
-      </select>
+                		
+				<input type="text" name="sub" style="width:100%;padding-left:12px;padding-bottom:5px" placeholder="Subject">		
+				<br><br>	
+				<select class="form-control" name="cname">
+					<option>General</option>
+					{% for i in companylist %}
+						<option>{{i[0]}}</option>
+					{% endfor %}
+			
+				</select>
 				
                 
-	<br><br>
-	<div class="label">
-<textarea class="span6" name="message" rows="5" placeholder="What's up?" required></textarea>
-</div>
+				<br>
+				
+				<textarea class="span6" name="message" style="width:100%;font-size:15px;padding-left:12px;padding-top:5px" rows="5" placeholder="What's up?" required></textarea>
+				
                 <br><br>
                
                 <button type = "submit" class="btn btn-primary"/>Send</button>
@@ -101,7 +98,7 @@
               </form>
             </div>
             <div class="card-footer text-muted">
-              Last Updated on January 1, 2017.
+              These alerts are subject to changes!
             </div>
           </div>
 

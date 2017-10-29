@@ -74,18 +74,20 @@
             <div class="card-body">
 
               <form action="/companyfill" method="post">
-                <input type="text" required autocomplete="off" value="" name="cname"/>
+                <input type="text" required autocomplete="off" value="" name="cname" placeholder="Company Name"/>
                 <div class="label">Company Name</div>
-                <input type="number"   autocomplete="off" value="" name="intake"/>
+                <input type="number"   autocomplete="off" value="" name="intake" placeholder="Intake"/>
                 <div class="label">Intake</div>
-                <input type="number"  autocomplete="off" value="" name="stipend"/>
+                <input type="number"  autocomplete="off" value="" name="stipend" placeholder="Stipend"/>
                 <div class="label">Stipend</div>
-                <input type="text"  autocomplete="off" value="" name="benefit"/>     
+                <input type="text"  autocomplete="off" name = "benefits" value="" placeholder="Benefits"/>     
                 <div class="label">Benefits</div>
-                <input type="date"  autocomplete="off" value="" name="cdate"/>
+                <input type="date"  autocomplete="off" value="" name="cdate" placeholder="Arrival Date"/>
                 <div class="label">Arrival Date</div>
-                <input type="time"  autocomplete="off" value="" name="ctime"/>
+                <input type="time"  autocomplete="off" value="" name="ctime" placeholder="Time"/>
                 <div class="label">Time</div>
+				<input type="text"  autocomplete="off" value="" name="url" placeholder="Company Website" required/>
+                <div class="label">Company Website</div>
                   
                 <br><br>
                 <button type="submit" class="btn btn-primary"/>Submit</button>
