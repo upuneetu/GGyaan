@@ -3,7 +3,7 @@ import os
 from flaskext.mysql import MySQL
 from flask import Flask,request,render_template,flash,redirect,session
 from wtforms import Form, BooleanField, StringField, PasswordField, validators
-
+import pyqrcode
 mysql = MySQL()
 
 app = Flask(__name__)
@@ -62,7 +62,8 @@ def home():
 	if 'username' in session:
 		companyinit()
 		cno=request.args.get('company')
-		
+		page=request.args.get('page')
+
 		conn = mysql.connect()
 		cursor = conn.cursor()
 			
@@ -80,10 +81,17 @@ def home():
 				pass
 			
 			
-			
-		cursor.execute(''' CALL get_newsfeed(\''''+session['username']+'''\')''')
+		if page is None:
+			page=0
+		page=int(page)
+		if page==0:
+			cursor.execute(''' CALL get_newsfeed(\''''+session['username']+'''\')''')
+		else:
+			cursor.execute(''' CALL get_eventalert(\''''+session['username']+'''\')''')
+
 		newsfeed = []
 		urls = []
+		result=[]
 		result = cursor.fetchall();
 		for i in result:
 			newsfeed.append(i)
@@ -97,8 +105,7 @@ def home():
 		conn.commit()
 		cursor.close()
 		conn.close()
-		print(newsfeed)
-		return render_template('home.html',flag=True, newsfeed=newsfeed, urls=urls)
+		return render_template('home.html',flag=True, newsfeed=newsfeed, urls=urls,page=page)
 	return render_template('index.html', flag=False)
 
 @app.route('/register',methods = ['GET','POST'])
@@ -440,13 +447,13 @@ def msgfill():
 
 		
 		
-		cursor.execute(''' INSERT INTO alert values( '''+sub+','+cname	+','+msgcontent+','+rno+',SYSDATE()'+''')''')
 		
 		
 		try:
 			#cursor.execute(''' INSERT INTO alert values( '''+cname	+','+msg+',SYSDATE()'+''')''')
 
-			
+			cursor.execute(''' INSERT INTO alert values( '''+sub+','+cname	+','+msgcontent+','+rno+',SYSDATE()'+''')''')
+
 
 			conn.commit()
 			cursor.close()
@@ -465,7 +472,71 @@ def msgfill():
 		return redirect("/home")
 	else:
 		return "FAIL"
-	
+
+@app.route('/events', methods = ['GET','POST'])
+def events():
+	companyinit()
+	return render_template("events.html",companylist=companylist)
+
+@app.route('/eventsfill' , methods = ['POST'])
+def eventsfill():
+		
+	if request.method == 'POST': #and form.validate()
+		conn = mysql.connect()
+		cursor = conn.cursor()		
+		
+		eventid = "\'" + str(request.form['eventid']) + "\'";
+
+		sub = "\'" + str(request.form['sub']) + "\'";
+		cname = "\'" + str(request.form['cname']) + "\'"
+		edate = "\'" + str(request.form['edate']) + "\'"
+		etime = "\'"+str(request.form['etime'])+"\'"
+		evenue = "\'"+str(request.form['evenue'])+"\'"
+		eduration = "\'"+str(request.form['eduration'])+"\'"
+
+		message = "\'"+str(request.form['message'])+"\'"
+		rno="\'"+session['username']+"\'"
+
+		
+		
+
+		
+		try:
+			#cursor.execute(''' INSERT INTO alert values( '''+cname	+','+msg+',SYSDATE()'+''')''')
+
+			
+			cursor.execute(''' INSERT INTO events values( '''+eventid+','+sub+','+cname	+','+edate+','+etime+','+evenue+','+eduration+','+message+','+rno+',SYSDATE()'+''')''')
+
+			conn.commit()
+			cursor.close()
+			conn.close()
+			return redirect("/home")
+			#return render_template('home.html')
+
+		except:
+			sucess = False;
+		
+		
+		
+		
+		cursor.close()
+		conn.close()
+		return redirect("/home")
+	else:
+		return "FAIL"	
+
+@app.route('/qrgen' , methods = ['GET', 'POST'])
+def qrgen():
+
+	if request.method=='POST':
+		edate = str(request.form['edate'])
+		etime = str(request.form['etime'])
+		eid = str(request.form['eid'])
+		qr = pyqrcode.create("DATE:TIME:EVENT_ID")
+		qr.png('static/qr.png',scale=5)
+		
+	return render_template('qrgen.html')
+
 
 if __name__ == "__main__":
 	#app.run(host="0.0.0.0",debug=True)

@@ -82,10 +82,20 @@
         
 		<div class="col-md-8">
 
-          <h2 class="my-4" style="color:#ffffff">Welcome Back !
-            <!--<small>You might have missed something when you were away...</small> -->
+		
+		{% if page==0 %}
+		<h2 class="my-4">Alerts
+            
           </h2>
+		{% else %}
+		<h2 class="my-4">Events
+            
+          </h2>
+		{% endif %}
+          
 		    <!-- Blog Post -->
+			
+	{% if page==0 %}
 		  {% for i in newsfeed: %}
 			<div class="card mb-4">
 					<div class = "row">
@@ -104,17 +114,58 @@
 			</div>
 		   {% endfor %}
 		   
-          
+    {% else %}
+		{% for i in newsfeed: %}
+			<div class="card mb-4">
+					<div class = "row">
+						<div class="card-body col-md-10">
+							<h2 class="card-title" style="padding-left:10px">{{i[1]+" : "+i[0]}}</h2>
+							
+							<p class="card-text" style="padding-left:25px;margin:0"><b>Date : </b>{{i[2]}}</p>
+							<p class="card-text" style="padding-left:25px;margin:0"><b>Start Time : </b>{{i[3]}}</p>
+							<p class="card-text" style="padding-left:25px;margin:0"><b>Duration : </b>{{i[5]}} hrs.</p>
+							<p class="card-text" style="padding-left:25px;margin:0"><b>Venue : </b>{{i[4]}}</p>
+
+
+
+							<p class="card-text" style="padding-left:25px">{{i[6]}}</p>
+						</div>
+						<div  style="display:flex;align-items:center;justify-content:center" class="col-md-2">
+							<img align="middle" style="auto;max-height:64px;max-width:64px;"  src={{"//logo.clearbit.com/"+urls[newsfeed.index(i)]}} alt="card img cap">
+						</div>
+					</div>
+					<div class="card-footer text-muted">
+						Posted on {{i[8]}} by {{i[7]}} 
+					</div>
+				
+			</div>
+	{% endfor %}
+	{% endif %}
+	
 
           <!-- Pagination -->
+		  {% if page==0 %}
           <ul class="pagination justify-content-center mb-4">
-            <li class="page-item">
-              <a class="page-link" href="#">&larr; Older</a>
-            </li>
             <li class="page-item disabled">
-              <a class="page-link" href="#">Newer &rarr;</a>
+              <a class="page-link" href="?page=0">&larr; Alerts</a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="?page=1">Events &rarr;</a>
             </li>
           </ul>
+		  
+		  {% else %}
+		  
+		  <ul class="pagination justify-content-center mb-4">
+            <li class="page-item">
+              <a class="page-link" href="?page=0">&larr; Alerts</a>
+            </li>
+            <li class="page-item disabled">
+              <a class="page-link" href="?page=1">Events &rarr;</a>
+            </li>
+          </ul>
+		  
+		  {%endif%}
 
         </div>
 

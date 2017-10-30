@@ -34,24 +34,21 @@
                 <span class="sr-only">(current)</span>
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item active">
               <a class="nav-link" href="/profile">Profile</a>
             </li>
 			{% if session['type'] == 'ic' %}
-            <li class="nav-item">
+			<li class="nav-item">
               <a class="nav-link" href="/msg">Messages</a>
             </li>
 			
-			
-			
-			<li class="nav-item active">
+			<li class="nav-item">
               <a class="nav-link" href="/events">Events</a>
             </li>
-			
+	
             <li class="nav-item">
               <a class="nav-link" href="/company">Company</a>
 			  </li>
-			  
 	<li class="nav-item">
 	
 	{% endif %}
@@ -72,56 +69,32 @@
         
 		<div class="col-md-8">
           <br>
-          <h1 class="my-4">Events
+          <h1 class="my-4">Profile
             
           </h1>
 
           <!-- Blog Post -->
           <div class="card mb-4 bg">
             <div class="card-body">
-
-              <form action="/eventsfill" method="post">
-			  
-			    <input type="text" name="eventid" style="width:100%;padding-left:12px;padding-bottom:5px" placeholder="Event ID">		
-				<br><br>
-                		
-				<input type="text" name="sub" style="width:100%;padding-left:12px;padding-bottom:5px" placeholder="Subject">		
-				<br><br>	
-				<select class="form-control" name="cname">
-					<option>General</option>
-					{% for i in companylist %}
-						<option>{{i[0]}}</option>
-					{% endfor %}
-			
-				</select>
-				
-				<br>
-				<input type="date" name="edate" style="width:100%;padding-left:12px;padding-bottom:5px" placeholder="Date">
-				<br><br>
-				
-				<input type="time" name="etime" style="width:100%;padding-left:12px;padding-bottom:5px" placeholder="Time">
-				<br><br>
-				
-				
-				<input type="text" name="evenue" style="width:100%;padding-left:12px;padding-bottom:5px" placeholder="Venue">
-				<br><br>
-				<input type="text" name="eduration" style="width:100%;padding-left:12px;padding-bottom:5px" placeholder="Duration">
-				<br><br>
-				
-				
-				<textarea class="span6" name="message" style="width:100%;font-size:15px;padding-left:12px;padding-top:5px" rows="5" placeholder="Event alert message" required></textarea>
-				
+			  <img src="{{ url_for('static', filename='qr.png') }}" alt="QR IMAGE"/>
+			  <br><br>
+              <form action="/qrgen" method="post">
+                
+                <input type="text" name="edate" placeholder="Date of Event">
+                <div class="label">Date of Event</div>
+                <input type="text" name="etime"placeholder="Time of Event">
+                <div class="label">Time of Event</div>
+				<input type="text" name="eid" placeholder="Event ID">
+                <div class="label">Event ID</div>
+                
                 <br><br>
                
-                <button type = "submit" class="btn btn-primary"/>Send</button>
+                <button type = "submit" class="btn btn-primary"/>Update</button>
                 <button type="reset" class="btn btn-primary"/>Reset</button>
 				
               </form>
             </div>
-            <br><br>
-			<div class="card-footer text-muted">
-              These events must be attended by students!
-            </div>
+            
           </div>
 
 		  
@@ -220,7 +193,8 @@
 	<script src="{{ url_for('static', filename='popper/popper.min.js') }}"></script>
 	<script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
 	
-
+	
+	
 
   </body>
 
