@@ -34,21 +34,15 @@
                 <span class="sr-only">(current)</span>
               </a>
             </li>
-            <li class="nav-item active">
-              <a class="nav-link" href="/profile">Profile</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">
-			  Services</a>
-            </li>
-			{% if session['type'] == 'ic' %}
-	
-            <li class="nav-item">
-              <a class="nav-link" href="/company">Company</a>
+            
+			
+				 <li class="nav-item active">
+              <a class="nav-link" href="/addic">IC</a>
 			  </li>
+			
 	<li class="nav-item">
 	
-	{% endif %}
+	
   <a class="nav-link"/ href="/logout">Logout</a>
   
             </li>
@@ -66,7 +60,7 @@
         
 		<div class="col-md-8">
           <br>
-          <h1 class="my-4">Profile
+          <h1 class="my-4">Add IC
             
           </h1>
 
@@ -103,67 +97,66 @@
         
         </div>
 
-        <!-- Sidebar Widgets Column -->
-        <div class="col-md-4">
+      <div class="col-md-4">
 
           <!-- Search Widget -->
-          <div class="card my-4">
-            <h5 class="card-header">Search</h5>
+          <div class="card my-4" color="">
+            <h5 class="card-header">Hello {{session['fname']}} !</h5>
             <div class="card-body">
-              <div class="input-group">
-                <input type="text" class="form-control" placeholder="Search for...">
-                <span class="input-group-btn">
-                  <button class="btn btn-secondary" type="button">Go!</button>
-                </span>
-              </div>
+			{% if nflag==0 %}
+			<p><b> Profile Complete </b></p>
+			<p><b> Good Job ! </b></p>
+			
+			{% else %}
+			
+              <p><b> Profile Incomplete ! </b></p>
+			  <p><b> Please fill these details ASAP: </b></p>
+			  
+			  {% if stud[4] == None %}
+			  <p style="padding-left:25px;margin:0"> Address </p>
+			  {% endif %}
+			  {% if stud[5] == None %}
+			  <p style="padding-left:25px;margin:0"> CGPA </p>
+			  {% endif %}
+			  {% if stud[6] == None %}
+			  <p style="padding-left:25px;margin:0"> Resume Link </p>
+			  {% endif %}
+			  {% if stud[7] == None %}
+			  <p style="padding-left:25px;margin:0"> Test Experience </p>
+			  {% endif %}
+			  {% endif%}
             </div>
           </div>
-
-          <!-- Categories Widget -->
+			
+          <!-- Companies Widget -->
           <div class="card my-4">
-            <h5 class="card-header">Categories</h5>
+            <h5 class="card-header">Companies to follow</h5>
             <div class="card-body">
               <div class="row">
-                <div class="col-lg-6">
+                
+                <div class="col-lg-8">
                   <ul class="list-unstyled mb-0">
+				  
+				  {% if session['companylist']|length==0: %}
+				  <p><b> No new companies </b></p>
+				  {%else%}
+				  
+					{% for i in session['companylist']: %}
                     <li>
-                      <a href="#">Web Design</a>
+                      <a href="/follow?company={{session['companylist'].index(i)}}"><button class="btn btn-primary" style="margin:5px">{{i[0]}}</button></a>
                     </li>
-                    <li>
-                      <a href="#">HTML</a>
-                    </li>
-                    <li>
-                      <a href="#">Freebies</a>
-                    </li>
-                  </ul>
-                </div>
-                <div class="col-lg-6">
-                  <ul class="list-unstyled mb-0">
-                    <li>
-                      <a href="#">JavaScript</a>
-                    </li>
-                    <li>
-                      <a href="#">CSS</a>
-                    </li>
-                    <li>
-                      <a href="#">Tutorials</a>
-                    </li>
+					
+					{% endfor %}
+                   {%endif%} 
                   </ul>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Side Widget -->
-          <div class="card my-4">
-            <h5 class="card-header">Side Widget</h5>
-            <div class="card-body">
-              You can put anything you want inside of these side widgets. They are easy to use, and feature the new Bootstrap 4 card containers!
-            </div>
-          </div>
+          
 
         </div>
-
       </div>
       <!-- /.row -->
 
@@ -173,7 +166,7 @@
     <!-- Footer -->
     <footer class="py-5 bg-dark">
       <div class="container">
-        <p class="m-0 text-center text-white">Copyright &copy; Your Website 2017</p>
+        <p class="m-0 text-center text-white">Copyright &copy; GGyaan</p>
       </div>
       <!-- /.container -->
     </footer>
