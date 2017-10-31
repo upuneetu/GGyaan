@@ -8,7 +8,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Home</title>
+    <title>GGyaan</title>
 
     <!-- Bootstrap core CSS -->
 	 <link href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}" rel='stylesheet' type='text/css'>
@@ -28,7 +28,7 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
       <div class="container">
-        <a class="navbar-brand" href="#">Internship GGyaan - A to Z of internship </a>
+        <a class="navbar-brand" href="#">Internship GGyaan - A to Z of Internship </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -39,9 +39,13 @@
                 <span class="sr-only">(current)</span>
               </a>
             </li>
+			 {% if session['type'] != 'admin' %}
+
             <li class="nav-item">
               <a class="nav-link" href="/profile">Profile</a>
             </li>
+			{% endif %}
+			
             {% if session['type'] == 'ic' %}
 			<li class="nav-item">
               <a class="nav-link" href="/msg">Messages</a>
@@ -51,6 +55,15 @@
 			<li class="nav-item">
               <a class="nav-link" href="/events">Events</a>
             </li>
+			
+			<li class="nav-item">
+              <a class="nav-link" href="/showattendance">Attendance</a>
+            </li>
+			
+			<li class="nav-item">
+              <a class="nav-link" href="/qrgen">QRGen</a>
+            </li>
+			
 			
             <li class="nav-item">
               <a class="nav-link" href="/company">Company</a>
@@ -94,7 +107,6 @@
 		{% endif %}
           
 		    <!-- Blog Post -->
-			
 	{% if page==0 %}
 		  {% for i in newsfeed: %}
 			<div class="card mb-4">
@@ -176,23 +188,43 @@
           <div class="card my-4" color="">
             <h5 class="card-header">Hello {{session['fname']}} !</h5>
             <div class="card-body">
-              <div class="input-group">
-                <input type="text" class="form-control" placeholder="Search for...">
-                <span class="input-group-btn">
-                  <button class="btn btn-secondary" type="button">Go!</button>
-                </span>
-              </div>
+			{% if nflag==0 %}
+			<p><b> Profile Complete </b></p>
+			<p><b> Good Job ! </b></p>
+			
+			{% else %}
+			
+              <p><b> Profile Incomplete ! </b></p>
+			  <p><b> Please fill these details ASAP: </b></p>
+			  
+			  {% if stud[4] == None %}
+			  <p style="padding-left:25px;margin:0"> Address </p>
+			  {% endif %}
+			  {% if stud[5] == None %}
+			  <p style="padding-left:25px;margin:0"> CGPA </p>
+			  {% endif %}
+			  {% if stud[6] == None %}
+			  <p style="padding-left:25px;margin:0"> Resume Link </p>
+			  {% endif %}
+			  {% if stud[7] == None %}
+			  <p style="padding-left:25px;margin:0"> Test Experience </p>
+			  {% endif %}
+			  {% endif%}
             </div>
           </div>
-
+			
           <!-- Companies Widget -->
           <div class="card my-4">
             <h5 class="card-header">Companies to follow</h5>
             <div class="card-body">
               <div class="row">
                 
-                <div class="col-lg-6">
+                <div class="col-lg-8">
                   <ul class="list-unstyled mb-0">
+				  
+				  {% if session['companylist']|length==0: %}
+				  <p><b> No new companies </b></p>
+				  {%else%}
 				  
 					{% for i in session['companylist']: %}
                     <li>
@@ -200,7 +232,7 @@
                     </li>
 					
 					{% endfor %}
-                    
+                   {%endif%} 
                   </ul>
                 </div>
               </div>

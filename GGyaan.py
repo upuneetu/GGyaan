@@ -4,6 +4,8 @@ from flaskext.mysql import MySQL
 from flask import Flask,request,render_template,flash,redirect,session
 from wtforms import Form, BooleanField, StringField, PasswordField, validators
 import pyqrcode
+from datetime import datetime
+
 mysql = MySQL()
 
 app = Flask(__name__)
@@ -48,8 +50,28 @@ def companyinit():
 			
 	else:
 		pass
+		
+	
+	stud=list()
+	nflag=0
+	
+	try:
+		cursor.execute("SELECT * from STUDENT WHERE rno='"+session['username']+"';")
+		stud = cursor.fetchone()
+			
+		for i in stud:
+			if(i is None or i==''):
+				nflag=1
+			
+				
+	except:
+		pass
+			
+	
 	cursor.close()
 	conn.close()
+	
+	return (nflag,stud)
 
 @app.context_processor
 def inject_user():
@@ -60,15 +82,15 @@ def inject_user():
 @app.route('/home', methods = ['GET','POST'])
 def home():
 	if 'username' in session:
-		companyinit()
+		(nflag,stud)=companyinit()
 		cno=request.args.get('company')
 		page=request.args.get('page')
-
+		rno="\'"+session['username']+"\'"
 		conn = mysql.connect()
 		cursor = conn.cursor()
 			
 		if cno is not None:
-			rno="\'"+session['username']+"\'"
+			
 			cname="\'"+session['companylist'][int(cno)][0]+"\'"
 			
 			try:
@@ -101,11 +123,13 @@ def home():
 				urls.append(str(b[0]))
 			else:
 				urls.append("google.com")
+		newsfeed.reverse()
 				
+		
 		conn.commit()
 		cursor.close()
 		conn.close()
-		return render_template('home.html',flag=True, newsfeed=newsfeed, urls=urls,page=page)
+		return render_template('home.html',nflag=nflag, newsfeed=newsfeed, urls=urls,page=page, stud=stud)
 	return render_template('index.html', flag=False)
 
 @app.route('/register',methods = ['GET','POST'])
@@ -148,6 +172,7 @@ def logout():
 		session.pop('username',None)
 		session.pop('type',None)
 		session.pop('fname',None)
+		session.pop('companylist',None)
 		return render_template('index.html',flag=False)
 
 @app.route('/authenticate', methods = ['GET','POST'])
@@ -158,7 +183,7 @@ def authenticate():
 
 	rno = "\'"+str(request.form['rno'])+"\'"
 	password = "\'"+str(request.form['passw'])+"\'"
-	
+
 	
 	if(rno=="\'akhil\'" and password=="\'destroy\'"):
 		session['username']='akhil'
@@ -231,6 +256,9 @@ def follow():
 	
 @app.route('/profile', methods = ['GET','POST'])
 def profile():
+	
+	(nflag,stud) = companyinit()
+
 	conn = mysql.connect()
 	cursor = conn.cursor()
 	cursor.execute("SELECT * from STUDENT WHERE rno=\'"+session['username']+"\';")
@@ -262,7 +290,7 @@ def profile():
 
 	cursor.close()
 	conn.close()
-	return render_template('profile.html',prefill=record)
+	return render_template('profile.html',prefill=record,nflag=nflag,stud=stud)
 		
 
 @app.route('/profilefill',methods = ['GET','POST'])
@@ -324,7 +352,8 @@ def profilefill():
 		
 @app.route('/company', methods = ['GET','POST'])
 def company():
-	return render_template('company.html')
+	(nflag,stud) = companyinit()
+	return render_template('company.html',nflag=nflag,stud=stud)
 
 		
 		
@@ -334,8 +363,8 @@ def companyfill():
 		conn = mysql.connect()
 		cursor = conn.cursor()		
 		
-		print("HERE1")
-		print(request.form)
+		
+		
 		cname = "\'"+str(request.form['cname'])+"\'";
 		intake = str(request.form['intake']);
 		stipend = str(request.form['stipend']);
@@ -356,7 +385,7 @@ def companyfill():
 		if(ctime==''):
 			ctime='NULL'
 		
-		print("HERE2")
+		
 		cursor.execute('''SELECT cname from COMPANY WHERE cname='''+cname)
 		a = cursor.fetchone()
 
@@ -371,7 +400,7 @@ def companyfill():
 		except:
 			pass		
 	
-		print("HERE3")
+		
 		cursor.close()
 		conn.close()
 		return redirect('/home')
@@ -380,7 +409,8 @@ def companyfill():
 	
 @app.route('/addic', methods = ['GET','POST'])
 def addic():
-	return render_template('addic.html')
+	(nflag,stud) = companyinit()
+	return render_template('addic.html',nflag=nflag,stud=stud)
 		
 
 @app.route('/addicfill',methods = ['GET','POST'])
@@ -429,9 +459,9 @@ def addicfill():
 	
 @app.route('/msg',methods = ['GET','POST'])
 def msg():
-	companyinit()
+	(nflag,stud) = companyinit()
 
-	return render_template('alert.html',companylist=companylist)
+	return render_template('alert.html',companylist=companylist,nflag=nflag,stud=stud)
 		
 @app.route('/msgfill',methods = ['GET','POST'])
 def msgfill():
@@ -475,8 +505,8 @@ def msgfill():
 
 @app.route('/events', methods = ['GET','POST'])
 def events():
-	companyinit()
-	return render_template("events.html",companylist=companylist)
+	(nflag,stud) = companyinit()
+	return render_template("events.html",companylist=companylist,nflag=nflag,stud=stud)
 
 @app.route('/eventsfill' , methods = ['POST'])
 def eventsfill():
@@ -527,17 +557,71 @@ def eventsfill():
 
 @app.route('/qrgen' , methods = ['GET', 'POST'])
 def qrgen():
-
+	(nflag,stud) = companyinit()
 	if request.method=='POST':
 		edate = str(request.form['edate'])
 		etime = str(request.form['etime'])
 		eid = str(request.form['eid'])
-		qr = pyqrcode.create("DATE:TIME:EVENT_ID")
+		qr = pyqrcode.create(edate+" : "+etime+"::"+eid)
+		#qr = pyqrcode.create("DATE:TIME:EVENT_ID")
 		qr.png('static/qr.png',scale=5)
 		
-	return render_template('qrgen.html')
-
-
+	return render_template('qrgen.html',rand=(str(datetime.now()).split(".")[1]),nflag=nflag,stud=stud)
+	
+@app.route('/attendance' , methods = ['GET', 'POST'])
+def attendance():
+	uname = str(request.values['username'])
+	pword = str(request.values['password'])
+	qrdata = str(request.values['qrdata'])
+	
+	conn = mysql.connect()
+	cursor = conn.cursor()
+	
+	
+	
+	eventid = qrdata.split("::")[1]
+	print(uname+":"+pword+":"+eventid)
+	#DO AUTHENTICATION HERE
+	
+	
+	cursor.execute("SELECT * from USERBASE WHERE rno='"+uname+"' AND password='"+ pword+"';")
+	a = cursor.fetchone()
+	flag = False;
+	if a is not None:
+		flag = True;
+	else:
+		cursor.execute("SELECT * from IC WHERE rno='"+uname+"' AND password='"+ pword+"';")
+		a = cursor.fetchone()
+		if a is not None:
+			flag = True
+	
+	if flag: 
+		cursor.execute("INSERT INTO ATTENDANCE VALUES('"+uname+"','"+eventid+"')")
+		conn.commit()
+		cursor.close()
+		conn.close()
+		return "AUTHENTICATION SUCCESS"
+	else:
+		return "AUTHENTICATION FAILED"
+	
+@app.route('/showattendance' , methods = ['GET', 'POST'])
+def showattendance():
+	(nflag,stud) = companyinit()
+	conn = mysql.connect()
+	cursor = conn.cursor()
+	studentlist = []
+	eventlist = []
+	eventid = None
+	if request.method=='POST':
+		eventid = str(request.form['eid'])
+		cursor.execute("SELECT rno FROM ATTENDANCE WHERE eventid = '"+eventid+"';")
+		studentlist = cursor.fetchall()
+		
+	cursor.execute("SELECT eventid,subject FROM EVENTS")
+	eventlist = cursor.fetchall()
+	
+	return render_template('attendance.html',elist=eventlist,slist=studentlist,eid=eventid,nflag=nflag,stud=stud)
+	
 if __name__ == "__main__":
-	#app.run(host="0.0.0.0",debug=True)
-	app.run(debug=True)
+	app.run(host="0.0.0.0",debug=True)
+	#app.run(debug=True)

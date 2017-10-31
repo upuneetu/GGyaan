@@ -38,27 +38,29 @@
               <a class="nav-link" href="/profile">Profile</a>
             </li>
 			{% if session['type'] == 'ic' %}
-			<li class="nav-item">
+            <li class="nav-item">
               <a class="nav-link" href="/msg">Messages</a>
             </li>
+			
+			
 			
 			<li class="nav-item">
               <a class="nav-link" href="/events">Events</a>
             </li>
 			
 			<li class="nav-item">
-              <a class="nav-link" href="/showattendance">Attendance</a>
+              <a class="nav-link active" href="/showattendance">Attendance</a>
             </li>
-	
-			<li class="nav-item active">
+			
+			<li class="nav-item">
               <a class="nav-link" href="/qrgen">QRGen</a>
             </li>
 			
-	
-	
+			
             <li class="nav-item">
               <a class="nav-link" href="/company">Company</a>
 			  </li>
+			  
 	<li class="nav-item">
 	
 	{% endif %}
@@ -79,30 +81,44 @@
         
 		<div class="col-md-8">
           <br>
-          <h1 class="my-4">Profile
+          <h1 class="my-4">Attendance
             
           </h1>
 
           <!-- Blog Post -->
           <div class="card mb-4 bg">
             <div class="card-body">
-			  <img src="{{ url_for('static', filename='qr.png')+ "?dummy=" + rand }}" alt="QR IMAGE"/>
-			  <br><br>
-              <form action="/qrgen" method="post">
-                
-                <input type="text" name="edate" placeholder="Date of Event">
-                <div class="label">Date of Event</div>
-                <input type="text" name="etime"placeholder="Time of Event">
-                <div class="label">Time of Event</div>
-				<input type="text" name="eid" placeholder="Event ID">
-                <div class="label">Event ID</div>
-                
+
+              <form action="/showattendance" method="post">
+                		
+				<select class="form-control" name="eid" placeholder="Events List">
+					{% for i in elist %}
+						<option>{{i[0]}}</option>
+					{% endfor %}
+				</select>	             
+				
                 <br><br>
                
-                <button type = "submit" class="btn btn-primary"/>Generate</button>
+                <button type = "submit" class="btn btn-primary"/>Show</button>
                 <button type="reset" class="btn btn-primary"/>Reset</button>
 				
               </form>
+			  
+			  <br>
+			  
+			  {% if slist!=None and eid!=None %}
+			  <b>{{"EVENT:"+eid}}</b>
+			  {% endif %}
+				<br>
+				<br>
+				<div>
+			  {% if slist!=None %}
+				{% for i in slist %}
+					{{i[0]}}
+					<br>
+				{% endfor %}
+			  {% endif %}
+				 </div>
             </div>
             
           </div>
@@ -180,11 +196,9 @@
             </div>
           </div>
 
-          
+         </div>
 
         </div>
-
-      </div>
       <!-- /.row -->
 
     </div>
@@ -204,8 +218,7 @@
 	<script src="{{ url_for('static', filename='popper/popper.min.js') }}"></script>
 	<script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
 	
-	
-	
+
 
   </body>
 
