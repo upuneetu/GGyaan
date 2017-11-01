@@ -94,9 +94,17 @@
                 <div class="label">Date of Event</div>
                 <input type="text" name="etime"placeholder="Time of Event">
                 <div class="label">Time of Event</div>
-				<input type="text" name="eid" placeholder="Event ID">
+				
+				<br>
+				
+				<select  class="form-control" name="eid">
+					{% for i in elist %}
+						<option>{{i[0]}}</option>
+					{% endfor %}
+			
+				</select>
                 <div class="label">Event ID</div>
-                
+
                 <br><br>
                
                 <button type = "submit" class="btn btn-primary"/>Generate</button>

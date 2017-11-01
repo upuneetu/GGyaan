@@ -185,8 +185,8 @@ def authenticate():
 	password = "\'"+str(request.form['passw'])+"\'"
 
 	
-	if(rno=="\'akhil\'" and password=="\'destroy\'"):
-		session['username']='akhil'
+	if(rno=="\'admin\'" and password=="\'admin\'"):
+		session['username']='admin'
 		session['type']='admin'
 		session['fname']='Admin'
 		return redirect("/home")
@@ -274,7 +274,22 @@ def profile():
 		record['fname'] = record_tuple[1]
 		record['lname'] = record_tuple[2]
 		record['email']= record_tuple[3]
-		record['address']=record_tuple[4]
+		randi = None
+		if record_tuple[4] is not None:
+			randi = record_tuple[4].split("\n")
+			if randi is not None:
+				record['address_line1'] = randi[0]
+				record['address_line2'] = randi[1]
+				record['address_line3'] = randi[2]
+				record['address_line4'] = randi[3]
+			
+		else:
+			record['address_line1'] = None
+			record['address_line2'] = None
+			record['address_line3'] = None
+			record['address_line4'] = None
+				
+			
 		record['cgpa'] = record_tuple[5]
 		record['resume'] = record_tuple[6]
 		record['testexp'] = record_tuple[7]
@@ -312,7 +327,7 @@ def profilefill():
 		addressLine3 = str(request.form['address_line3']);
 		addressLine4 = str(request.form['address_line4']);
 		
-		address = addressLine1 + " " + addressLine2 + " " + addressLine3 + " " + addressLine4;
+		address = addressLine1 + "\n" + addressLine2 + "\n" + addressLine3 + "\n" + addressLine4;
 		address = "\'"+address+"\'";
 		cgpa = str(request.form['cgpa']);
 		resume = "\'"+str(request.form['resume'])+"\'";
@@ -558,6 +573,7 @@ def eventsfill():
 @app.route('/qrgen' , methods = ['GET', 'POST'])
 def qrgen():
 	(nflag,stud) = companyinit()
+	event=[]
 	if request.method=='POST':
 		edate = str(request.form['edate'])
 		etime = str(request.form['etime'])
@@ -566,7 +582,26 @@ def qrgen():
 		#qr = pyqrcode.create("DATE:TIME:EVENT_ID")
 		qr.png('static/qr.png',scale=5)
 		
-	return render_template('qrgen.html',rand=(str(datetime.now()).split(".")[1]),nflag=nflag,stud=stud)
+		
+	conn = mysql.connect()
+	cursor = conn.cursor()
+		
+		
+	try:
+			#cursor.execute(''' INSERT INTO alert values( '''+cname	+','+msg+',SYSDATE()'+''')''')		
+		cursor.execute(''' SELECT eventid from events ''')
+		event=cursor.fetchall()
+				
+			#return render_template('home.html')
+	except:
+		pass
+
+	conn.commit()
+	cursor.close()
+	conn.close()
+				
+	
+	return render_template('qrgen.html',elist=event,rand=(str(datetime.now()).split(".")[1]),nflag=nflag,stud=stud)
 	
 @app.route('/attendance' , methods = ['GET', 'POST'])
 def attendance():
@@ -590,7 +625,7 @@ def attendance():
 	if a is not None:
 		flag = True;
 	else:
-		cursor.execute("SELECT * from IC WHERE rno='"+uname+"' AND password='"+ pword+"';")
+		cursor.execute("SELECT * from IC WHERE username='"+uname+"' AND passwd='"+ pword+"';")
 		a = cursor.fetchone()
 		if a is not None:
 			flag = True

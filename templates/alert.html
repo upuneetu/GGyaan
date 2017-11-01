@@ -92,9 +92,9 @@
 
               <form action="/msgfill" method="post">
                 		
-				<input type="text" name="sub" style="width:100%;padding-left:12px;padding-bottom:5px" placeholder="Subject">		
+				<input type="text" required name="sub" style="width:100%;padding-left:12px;padding-bottom:5px" placeholder="Subject">		
 				<br><br>	
-				<select class="form-control" name="cname">
+				<select  class="form-control" name="cname">
 					<option>General</option>
 					{% for i in companylist %}
 						<option>{{i[0]}}</option>
